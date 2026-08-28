@@ -1,19 +1,12 @@
 import { useState, useEffect } from 'react';
-import TaskList from './components/TaskList';
 import { type Task, type TaskStatus } from './components/TaskItem';
-import SingleStateForm, { type NewTaskData } from './components/TaskForm';
+import { type NewTaskData } from './components/TaskForm';
+import TaskList from './components/TaskList';
+import TaskForm from './components/TaskForm';
 import TaskFilter from './components/TaskFilter';
 import Dashboard from './components/TaskDashboard';
-import './App.css';
 
-export interface UserData {
-  firstName: string;
-  lastName: string;
-  email: string;
-  message?: string;
-}
-
-const defaultTasks: Task[] = [
+const DEFAULT_TASKS: Task[] = [
   {
     id: '1',
     title: 'Task 1',
@@ -30,31 +23,22 @@ const defaultTasks: Task[] = [
     priority: 'medium',
     dueDate: '1/1/2027',
   },
-  {
-    id: '3',
-    title: 'Task 3',
-    description: 'Description 3',
-    status: 'completed',
-    priority: 'high',
-    dueDate: '1/2/2027',
-  },
 ];
 
-function App() {
-  const [userData] = useState<UserData | null>(() => {
-    const savedUser = localStorage.getItem('taskTracker_user');
-    return savedUser ? JSON.parse(savedUser) : null;
-  });
-
+export default function App() {
   const [tasks, setTasks] = useState<Task[]>(() => {
-    const savedTasks = localStorage.getItem('taskTracker_tasks');
-    return savedTasks ? JSON.parse(savedTasks) : defaultTasks;
+    const saved = localStorage.getItem('taskTracker_tasks');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error('Failed to parse localStorage tasks:', e);
+      }
+    }
+    return DEFAULT_TASKS;
   });
 
-  // --- EDITING STATE ---
-  const [taskToEdit, setTaskToEdit] = useState<Task | null>(null);
-
-  // --- FILTER & SEARCH STATE ---
+  // Dedicated state matching TaskFilter props
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -63,35 +47,22 @@ function App() {
     localStorage.setItem('taskTracker_tasks', JSON.stringify(tasks));
   }, [tasks]);
 
-  // --- HANDLERS ---
   const handleAddTask = (newTaskData: NewTaskData) => {
     const newTask: Task = {
       ...newTaskData,
       id: Date.now().toString(),
     };
-    setTasks((prev) => [newTask, ...prev]);
-  };
-
-  const handleUpdateTask = (updatedTask: Task) => {
-    setTasks((prev) =>
-      prev.map((t) => (t.id === updatedTask.id ? updatedTask : t))
-    );
-    setTaskToEdit(null);
+    setTasks((prevTasks) => [newTask, ...prevTasks]);
   };
 
   const handleStatusChange = (taskId: string, newStatus: TaskStatus) => {
     setTasks((prev) =>
-      prev.map((task) =>
-        task.id === taskId ? { ...task, status: newStatus } : task
-      )
+      prev.map((t) => (t.id === taskId ? { ...t, status: newStatus } : t))
     );
   };
 
   const handleDelete = (taskId: string) => {
-    setTasks((prev) => prev.filter((task) => task.id !== taskId));
-    if (taskToEdit?.id === taskId) {
-      setTaskToEdit(null);
-    }
+    setTasks((prev) => prev.filter((t) => t.id !== taskId));
   };
 
   const handleClearFilters = () => {
@@ -100,8 +71,7 @@ function App() {
     setSearchQuery('');
   };
 
-
-  // --- FILTER TASKS ---
+  // Filter tasks array safely
   const filteredTasks = tasks.filter((task) => {
     const matchesStatus =
       statusFilter === 'all' || task.status === statusFilter;
@@ -116,54 +86,26 @@ function App() {
 
   return (
     <div className="min-h-screen bg-[#0b0c10] text-slate-100 p-8">
-      <div className="max-w-3xl mx-auto">
-        <header className="mb-6 text-center">
-          <h1 className="text-2xl font-bold text-pink-100 tracking-tight flex items-center justify-center gap-1.5">
-            Task Dashboard <span className="text-pink-400/50 font-normal">#</span> ✨
-          </h1>
-          <p className="text-xs text-pink-300/50 mt-1">
-            Keep track of your goals in style 🌸
-          </p>
-          {userData && (
-            <p className="text-sm text-pink-300 font-medium mt-2">
-              Welcome back, {userData.firstName}! 👋
-            </p>
-          )}
-        </header>
+      <div className="max-w-3xl mx-auto space-y-6">
+        <Dashboard tasks={tasks} />
+        <TaskForm onAddTask={handleAddTask} />
 
-        <main className="space-y-6">
-          {/* Dashboard Summary Stats */}
-          <Dashboard tasks={tasks} />
+        <TaskFilter
+          statusFilter={statusFilter}
+          priorityFilter={priorityFilter}
+          searchQuery={searchQuery}
+          onStatusFilterChange={setStatusFilter}
+          onPriorityFilterChange={setPriorityFilter}
+          onSearchQueryChange={setSearchQuery}
+          onClearFilters={handleClearFilters}
+        />
 
-          {/* Form for Add & Edit */}
-          <SingleStateForm
-            onAddTask={handleAddTask}
-            onUpdateTask={handleUpdateTask}
-            taskToEdit={taskToEdit}
-            onCancelEdit={() => setTaskToEdit(null)}
-          />
-
-          {/* Filter & Search Bar */}
-          <TaskFilter
-            statusFilter={statusFilter}
-            priorityFilter={priorityFilter}
-            searchQuery={searchQuery}
-            onStatusFilterChange={setStatusFilter}
-            onPriorityFilterChange={setPriorityFilter}
-            onSearchQueryChange={setSearchQuery}
-            onClearFilters={handleClearFilters}
-          />
-
-          {/* Task Item List */}
-          <TaskList
-            tasks={filteredTasks}
-            onStatusChange={handleStatusChange}
-            onDelete={handleDelete}
-          />
-        </main>
+        <TaskList
+          tasks={filteredTasks}
+          onStatusChange={handleStatusChange}
+          onDelete={handleDelete}
+        />
       </div>
     </div>
   );
 }
-
-export default App;
