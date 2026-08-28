@@ -1,6 +1,7 @@
 import { useState } from 'react';
 
-interface TaskData {
+// 1. Export NewTaskData so App.tsx can import it
+export interface NewTaskData {
   firstName: string;
   lastName: string;
   password: string;
@@ -16,9 +17,13 @@ interface FormErrors {
   message?: string;
 }
 
-const SingleStateForm: React.FC = () => {
-  // Renamed state to lowercase taskData to avoid interface name collision
-  const [taskData, setTaskData] = useState<TaskData>({
+// 2. Define props to accept onAddTask from App.tsx
+interface SingleStateFormProps {
+  onAddTask?: (data: NewTaskData) => void;
+}
+
+const SingleStateForm: React.FC<SingleStateFormProps> = ({ onAddTask }) => {
+  const [taskData, setTaskData] = useState<NewTaskData>({
     firstName: "",
     lastName: "",
     email: "",
@@ -38,7 +43,6 @@ const SingleStateForm: React.FC = () => {
       [name]: value,
     }));
 
-    // Optional: Clear individual field error as the user types
     setErrors((prevErrors) => ({
       ...prevErrors,
       [name]: "",
@@ -48,10 +52,8 @@ const SingleStateForm: React.FC = () => {
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    // 1. Create a local temporary object to collect validation errors
     const newErrors: FormErrors = {};
 
-    // 2. Perform field validations
     if (taskData.password.length < 8) {
       newErrors.password = "Password must be at least 8 characters long.";
     }
@@ -64,15 +66,17 @@ const SingleStateForm: React.FC = () => {
       newErrors.message = "Message must be at least 10 characters long.";
     }
 
-    // 3. Save all collected errors into state at once
     setErrors(newErrors);
 
-    // 4. Stop form execution if any errors exist
     if (Object.keys(newErrors).length > 0) {
       return;
     }
 
-    // 5. Submit successful data
+    // Call onAddTask if passed from parent
+    if (onAddTask) {
+      onAddTask(taskData);
+    }
+
     console.log("Form submitted successfully:", taskData);
   };
 
