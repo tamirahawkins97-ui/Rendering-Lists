@@ -47,8 +47,8 @@ function App() {
     <div className="min-h-screen bg-[#0b0c10] text-slate-100 p-8">
       <div className="max-w-3xl mx-auto">
         <header className="mb-6">
-          <h1 className="text-2xl font-bold text-pink-100 tracking-tight flex items-center gap-1.5">
-            Completed Example <span className="text-pink-400/50 font-normal">#</span> ✨
+          <h1 className="text-2xl font-bold text-pink-100 tracking-tight flex items-center gap-1.5 pl-55">
+            Task Tracker <span className="text-pink-400/50 font-normal">#</span> ✨
           </h1>
           <p className="text-xs text-pink-300/50 mt-1">
             Keep track of your goals in style 🌸
