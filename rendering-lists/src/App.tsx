@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import TaskList from './components/TaskList';
 import { type Task, type TaskStatus } from './components/TaskItem';
 import SingleStateForm, { type NewTaskData } from './components/TaskForm';
+import TaskFilter from './components/TaskFilter';
 import './App.css';
 
 export interface UserData {
@@ -49,6 +50,11 @@ function App() {
     return savedTasks ? JSON.parse(savedTasks) : defaultTasks;
   });
 
+  // --- FILTER & SEARCH STATE ---
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [priorityFilter, setPriorityFilter] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+
   useEffect(() => {
     localStorage.setItem('taskTracker_tasks', JSON.stringify(tasks));
   }, [tasks]);
@@ -73,6 +79,25 @@ function App() {
     setTasks((prev) => prev.filter((task) => task.id !== taskId));
   };
 
+  const handleClearFilters = () => {
+    setStatusFilter('all');
+    setPriorityFilter('all');
+    setSearchQuery('');
+  };
+
+  // --- FILTER TASKS ---
+  const filteredTasks = tasks.filter((task) => {
+    const matchesStatus =
+      statusFilter === 'all' || task.status === statusFilter;
+    const matchesPriority =
+      priorityFilter === 'all' || task.priority === priorityFilter;
+    const matchesSearch =
+      task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      task.description.toLowerCase().includes(searchQuery.toLowerCase());
+
+    return matchesStatus && matchesPriority && matchesSearch;
+  });
+
   return (
     <div className="min-h-screen bg-[#0b0c10] text-slate-100 p-8">
       <div className="max-w-3xl mx-auto">
@@ -92,9 +117,19 @@ function App() {
 
         <main className="space-y-6">
           <SingleStateForm onAddTask={handleAddTask} />
-          
+
+          <TaskFilter
+            statusFilter={statusFilter}
+            priorityFilter={priorityFilter}
+            searchQuery={searchQuery}
+            onStatusFilterChange={setStatusFilter}
+            onPriorityFilterChange={setPriorityFilter}
+            onSearchQueryChange={setSearchQuery}
+            onClearFilters={handleClearFilters}
+          />
+
           <TaskList
-            tasks={tasks}
+            tasks={filteredTasks}
             onStatusChange={handleStatusChange}
             onDelete={handleDelete}
           />

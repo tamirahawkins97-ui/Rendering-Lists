@@ -1,40 +1,45 @@
 export interface TaskFilterProps {
   statusFilter: string;
   priorityFilter: string;
-  searchQuery: string;
+  searchQuery?: string;
   onStatusFilterChange: (status: string) => void;
   onPriorityFilterChange: (priority: string) => void;
-  onSearchQueryChange: (query: string) => void;
-  onClearFilters: () => void;
+  onSearchQueryChange?: (query: string) => void;
+  onClearFilters?: () => void;
 }
 
 function TaskFilter({
-  statusFilter,
-  priorityFilter,
-  searchQuery,
+  statusFilter = 'all',
+  priorityFilter = 'all',
+  searchQuery = '',
   onStatusFilterChange,
   onPriorityFilterChange,
   onSearchQueryChange,
   onClearFilters,
 }: TaskFilterProps) {
-  const hasActiveFilters = statusFilter !== 'all' || priorityFilter !== 'all' || searchQuery.trim() !== '';
+  const hasActiveFilters =
+    statusFilter !== 'all' ||
+    priorityFilter !== 'all' ||
+    (searchQuery && searchQuery.trim() !== '');
 
   return (
     <div className="space-y-4 mb-6 bg-slate-900/40 p-4 rounded-2xl border border-pink-500/10">
       <div className="flex flex-wrap gap-4 items-end">
         {/* Search Input */}
-        <div className="flex flex-col gap-1.5 flex-1 min-w-[200px]">
-          <label className="text-xs font-medium text-pink-300/70 tracking-wide uppercase">
-            Search Tasks
-          </label>
-          <input
-            type="text"
-            placeholder="Search by title or description..."
-            value={searchQuery}
-            onChange={(e) => onSearchQueryChange(e.target.value)}
-            className="bg-slate-900/80 text-pink-100 border border-pink-500/20 rounded-xl px-3.5 py-1.5 text-sm font-medium focus:outline-none focus:border-pink-400 shadow-sm transition-all placeholder:text-slate-500"
-          />
-        </div>
+        {onSearchQueryChange && (
+          <div className="flex flex-col gap-1.5 flex-1 min-w-[200px]">
+            <label className="text-xs font-medium text-pink-300/70 tracking-wide uppercase">
+              Search Tasks
+            </label>
+            <input
+              type="text"
+              placeholder="Search by title or description..."
+              value={searchQuery}
+              onChange={(e) => onSearchQueryChange(e.target.value)}
+              className="bg-slate-900/80 text-pink-100 border border-pink-500/20 rounded-xl px-3.5 py-1.5 text-sm font-medium focus:outline-none focus:border-pink-400 shadow-sm transition-all placeholder:text-slate-500"
+            />
+          </div>
+        )}
 
         {/* Status Filter */}
         <div className="flex flex-col gap-1.5">
@@ -90,12 +95,14 @@ function TaskFilter({
               Search: "{searchQuery}"
             </span>
           )}
-          <button
-            onClick={onClearFilters}
-            className="ml-auto text-pink-400 hover:text-pink-300 underline font-medium transition-colors"
-          >
-            Clear all
-          </button>
+          {onClearFilters && (
+            <button
+              onClick={onClearFilters}
+              className="ml-auto text-pink-400 hover:text-pink-300 underline font-medium transition-colors"
+            >
+              Clear all
+            </button>
+          )}
         </div>
       )}
     </div>
