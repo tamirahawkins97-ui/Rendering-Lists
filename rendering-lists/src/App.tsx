@@ -100,33 +100,6 @@ function App() {
     setSearchQuery('');
   };
 
-  // --- DATA EXPORT / IMPORT ---
-  const handleExportData = () => {
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(tasks, null, 2));
-    const downloadAnchor = document.createElement('a');
-    downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", `tasks_backup_${Date.now()}.json`);
-    document.body.appendChild(downloadAnchor);
-    downloadAnchor.click();
-    downloadAnchor.remove();
-  };
-
-  const handleImportData = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const fileReader = new FileReader();
-    if (e.target.files && e.target.files[0]) {
-      fileReader.readAsText(e.target.files[0], "UTF-8");
-      fileReader.onload = (event) => {
-        try {
-          const imported = JSON.parse(event.target?.result as string);
-          if (Array.isArray(imported)) {
-            setTasks(imported);
-          }
-        } catch {
-          alert('Invalid JSON file format.');
-        }
-      };
-    }
-  };
 
   // --- FILTER TASKS ---
   const filteredTasks = tasks.filter((task) => {
@@ -156,25 +129,6 @@ function App() {
               Welcome back, {userData.firstName}! 👋
             </p>
           )}
-
-          {/* Export / Import Controls */}
-          <div className="flex justify-end gap-3 mt-4 text-xs">
-            <button
-              onClick={handleExportData}
-              className="bg-slate-800 hover:bg-slate-700 text-pink-200 border border-pink-500/20 px-3 py-1.5 rounded-lg transition-colors"
-            >
-              📥 Export JSON
-            </button>
-            <label className="bg-slate-800 hover:bg-slate-700 text-pink-200 border border-pink-500/20 px-3 py-1.5 rounded-lg cursor-pointer transition-colors">
-              📤 Import JSON
-              <input
-                type="file"
-                accept=".json"
-                onChange={handleImportData}
-                className="hidden"
-              />
-            </label>
-          </div>
         </header>
 
         <main className="space-y-6">
