@@ -1,7 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import TaskList from './components/TaskList';
 import { type Task, type TaskStatus } from './components/TaskItem';
 import './App.css'; // Make sure your Tailwind/CSS imports are linked here or in main.tsx
+import SingleStateForm from './components/TaskForm';
+
+export interface UserData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  message?: string;
+}
 
 function App() {
   const [tasks, setTasks] = useState<Task[]>([
@@ -38,6 +46,21 @@ function App() {
       )
     );
   };
+  const [userData, setUserData] = useState<UserData | null>(() => {
+    const savedUser = localStorage.getItem('taskTracker_user');
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
+
+  useEffect(() => {
+    if (userData) {
+      localStorage.setItem('taskTracker_user', JSON.stringify(userData));
+    }
+  }, [userData]);
+  
+  // const [tasks, setTasks] = useState<Task[]>(() => {
+  //   const savedTasks = localStorage.getItem('taskTracker_tasks');
+  //   return savedTasks ? JSON.parse(savedTasks) : defaultTasks;
+  // });
 
   const handleDelete = (taskId: string) => {
     setTasks((prev) => prev.filter((task) => task.id !== taskId));
@@ -56,6 +79,8 @@ function App() {
         </header>
 
         <main>
+          <SingleStateForm
+          />
           <TaskList
             tasks={tasks}
             onStatusChange={handleStatusChange}

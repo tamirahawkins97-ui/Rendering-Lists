@@ -104,7 +104,7 @@ const SingleStateForm: React.FC = () => {
         </div>
 
         <div>
-          <label>Email</label>
+          <label>Email:</label>
           <input
             type="email"
             name="email"
@@ -116,7 +116,7 @@ const SingleStateForm: React.FC = () => {
         </div>
 
         <div>
-          <label>Password</label>
+          <label>Password:</label>
           <input
             type="password"
             name="password"
@@ -128,7 +128,7 @@ const SingleStateForm: React.FC = () => {
         </div>
 
         <div>
-          <label>Message</label>
+          <label>Message:</label>
           <textarea
             id="message"
             name="message"
