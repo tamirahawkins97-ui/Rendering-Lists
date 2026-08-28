@@ -1,151 +1,108 @@
 import { useState } from 'react';
+import { type TaskStatus } from './TaskItem';
 
-// 1. Export NewTaskData so App.tsx can import it
 export interface NewTaskData {
-  firstName: string;
-  lastName: string;
-  password: string;
-  email: string;
-  message: string;
+  title: string;
+  description: string;
+  status: TaskStatus;
+  priority: 'low' | 'medium' | 'high';
+  dueDate: string;
 }
 
-interface FormErrors {
-  firstName?: string;
-  lastName?: string;
-  password?: string;
-  email?: string;
-  message?: string;
-}
-
-// 2. Define props to accept onAddTask from App.tsx
 interface SingleStateFormProps {
-  onAddTask?: (data: NewTaskData) => void;
+  onAddTask: (taskData: NewTaskData) => void;
 }
 
 const SingleStateForm: React.FC<SingleStateFormProps> = ({ onAddTask }) => {
-  const [taskData, setTaskData] = useState<NewTaskData>({
-    firstName: "",
-    lastName: "",
-    email: "",
-    password: "",
-    message: "",
+  const [formData, setFormData] = useState<NewTaskData>({
+    title: '',
+    description: '',
+    status: 'in-progress',
+    priority: 'medium',
+    dueDate: '',
   });
 
-  const [errors, setErrors] = useState<FormErrors>({});
-
   const handleChange = (
-    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
-    const { name, value } = event.target;
-
-    setTaskData((prevTaskData) => ({
-      ...prevTaskData,
-      [name]: value,
-    }));
-
-    setErrors((prevErrors) => ({
-      ...prevErrors,
-      [name]: "",
-    }));
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.title.trim()) return;
 
-    const newErrors: FormErrors = {};
-
-    if (taskData.password.length < 8) {
-      newErrors.password = "Password must be at least 8 characters long.";
-    }
-
-    if (!taskData.email.includes("@")) {
-      newErrors.email = "Please enter a valid email address.";
-    }
-
-    if (taskData.message.trim().length < 10) {
-      newErrors.message = "Message must be at least 10 characters long.";
-    }
-
-    setErrors(newErrors);
-
-    if (Object.keys(newErrors).length > 0) {
-      return;
-    }
-
-    // Call onAddTask if passed from parent
-    if (onAddTask) {
-      onAddTask(taskData);
-    }
-
-    console.log("Form submitted successfully:", taskData);
+    onAddTask(formData);
+    
+    setFormData({
+      title: '',
+      description: '',
+      status: 'in-progress',
+      priority: 'medium',
+      dueDate: '',
+    });
   };
 
   return (
-    <div>
-      <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} className="space-y-4 bg-slate-900 p-4 rounded-lg">
+      <div>
+        <label className="block text-sm font-medium mb-1">Title</label>
+        <input
+          type="text"
+          name="title"
+          value={formData.title}
+          onChange={handleChange}
+          required
+          className="w-full p-2 bg-slate-800 rounded text-slate-100 border border-slate-700"
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium mb-1">Description</label>
+        <textarea
+          name="description"
+          value={formData.description}
+          onChange={handleChange}
+          className="w-full p-2 bg-slate-800 rounded text-slate-100 border border-slate-700"
+        />
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
         <div>
-          <label>First Name:</label>
+          <label className="block text-sm font-medium mb-1">Priority</label>
+          <select
+            name="priority"
+            value={formData.priority}
+            onChange={handleChange}
+            className="w-full p-2 bg-slate-800 rounded text-slate-100 border border-slate-700"
+          >
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">Due Date</label>
           <input
             type="text"
-            name="firstName"
-            value={taskData.firstName}
+            name="dueDate"
+            placeholder="e.g. 12/31/2026"
+            value={formData.dueDate}
             onChange={handleChange}
-            required
+            className="w-full p-2 bg-slate-800 rounded text-slate-100 border border-slate-700"
           />
-          {errors.firstName && <p style={{ color: "red" }}>{errors.firstName}</p>}
         </div>
+      </div>
 
-        <div>
-          <label>Last Name:</label>
-          <input
-            type="text"
-            name="lastName"
-            value={taskData.lastName}
-            onChange={handleChange}
-            required
-          />
-          {errors.lastName && <p style={{ color: "red" }}>{errors.lastName}</p>}
-        </div>
-
-        <div>
-          <label>Email:</label>
-          <input
-            type="email"
-            name="email"
-            value={taskData.email}
-            onChange={handleChange}
-            required
-          />
-          {errors.email && <p style={{ color: "red" }}>{errors.email}</p>}
-        </div>
-
-        <div>
-          <label>Password:</label>
-          <input
-            type="password"
-            name="password"
-            value={taskData.password}
-            onChange={handleChange}
-            required
-          />
-          {errors.password && <p style={{ color: "red" }}>{errors.password}</p>}
-        </div>
-
-        <div>
-          <label>Message:</label>
-          <textarea
-            id="message"
-            name="message"
-            rows={5}
-            value={taskData.message}
-            onChange={handleChange}
-          />
-          {errors.message && <p style={{ color: "red" }}>{errors.message}</p>}
-        </div>
-
-        <button type="submit">Submit</button>
-      </form>
-    </div>
+      <button
+        type="submit"
+        className="w-full py-2 bg-pink-500 hover:bg-pink-600 font-semibold rounded text-white transition-colors"
+      >
+        Add Task
+      </button>
+    </form>
   );
 };
 
