@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { type Task, type TaskStatus } from './components/TaskItem';
 import { type NewTaskData } from './components/TaskForm';
 import TaskList from './components/TaskList';
@@ -23,29 +23,23 @@ const DEFAULT_TASKS: Task[] = [
     priority: 'medium',
     dueDate: '1/1/2027',
   },
+{
+    id: '3',
+    title: 'Task 3',
+    description: 'Description 3',
+    status: 'in-progress',
+    priority: 'medium',
+    dueDate: '1/1/2027',
+  },
 ];
 
 export default function App() {
-  const [tasks, setTasks] = useState<Task[]>(() => {
-    const saved = localStorage.getItem('taskTracker_tasks');
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {
-        console.error('Failed to parse localStorage tasks:', e);
-      }
-    }
-    return DEFAULT_TASKS;
-  });
+  const [tasks, setTasks] = useState<Task[]>(DEFAULT_TASKS);
 
   // Dedicated state matching TaskFilter props
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
-
-  useEffect(() => {
-    localStorage.setItem('taskTracker_tasks', JSON.stringify(tasks));
-  }, [tasks]);
 
   const handleAddTask = (newTaskData: NewTaskData) => {
     const newTask: Task = {

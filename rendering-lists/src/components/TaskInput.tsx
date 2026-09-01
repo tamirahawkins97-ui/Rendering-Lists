@@ -20,7 +20,7 @@ const TaskForm: React.FC<TaskFormProps> = ({ onAddTask }) => {
     dueDate: '',
   });
 
-  const [errors, setErrors] = useState<{ title?: string; dueDate?: string }>({});
+  const [errors, setErrors] = useState<{ title?: string; dueDate?: string, description?: string }>({});
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -34,12 +34,15 @@ const TaskForm: React.FC<TaskFormProps> = ({ onAddTask }) => {
     e.preventDefault();
 
     // Basic Validation for Task Creation
-    const newErrors: { title?: string; dueDate?: string } = {};
+    const newErrors: { title?: string; dueDate?: string, description?: string } = {};
     if (!taskData.title.trim()) {
       newErrors.title = 'Task title is required.';
     }
     if (!taskData.dueDate.trim()) {
       newErrors.dueDate = 'Due date is required.';
+    }
+    if (!taskData.description.trim()) {
+      newErrors.description = 'Task description is required.';
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -89,6 +92,7 @@ const TaskForm: React.FC<TaskFormProps> = ({ onAddTask }) => {
           placeholder="Brief details about the task..."
           className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-sm text-slate-100 focus:outline-none focus:border-pink-500"
         />
+        {errors.description && <p className="text-red-400 text-xs mt-1">{errors.description}</p>}
       </div>
 
       {/* Priority & Due Date Inputs */}
