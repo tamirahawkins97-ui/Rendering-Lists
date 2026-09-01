@@ -30,7 +30,7 @@ const TaskForm: React.FC<TaskFormProps> = ({ onAddTask }) => {
     setErrors((prev) => ({ ...prev, [name]: '' }));
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: React.ChangeEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     // Basic Validation for Task Creation

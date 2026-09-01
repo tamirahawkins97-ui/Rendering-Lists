@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, type ChangeEvent } from 'react';
 import { type Task, type TaskStatus } from './TaskItem';
 
 export interface NewTaskData {
@@ -16,45 +16,41 @@ interface SingleStateFormProps {
   onCancelEdit?: () => void;
 }
 
-const SingleStateForm: React.FC<SingleStateFormProps> = ({
+const DEFAULT_FORM_STATE: NewTaskData = {
+  title: '',
+  description: '',
+  status: 'in-progress',
+  priority: 'medium',
+  dueDate: '',
+};
+
+const getInitialFormData = (task: Task | null | undefined): NewTaskData => {
+  if (task) {
+    return {
+      title: task.title,
+      description: task.description,
+      status: task.status,
+      priority: task.priority,
+      dueDate: task.dueDate,
+    };
+  }
+  return DEFAULT_FORM_STATE;
+};
+
+const SingleStateForm = ({
   onAddTask,
   onUpdateTask,
   taskToEdit,
   onCancelEdit,
-}) => {
-  const [formData, setFormData] = useState<NewTaskData>({
-    title: '',
-    description: '',
-    status: 'in-progress',
-    priority: 'medium',
-    dueDate: '',
-  });
+}: SingleStateFormProps) => {
+  const [formData, setFormData] = useState<NewTaskData>(() =>
+    getInitialFormData(taskToEdit)
+  );
 
   const [errors, setErrors] = useState<{ title?: string }>({});
 
-  // Populate form if editing an existing task
-  useEffect(() => {
-    if (taskToEdit) {
-      setFormData({
-        title: taskToEdit.title,
-        description: taskToEdit.description,
-        status: taskToEdit.status,
-        priority: taskToEdit.priority,
-        dueDate: taskToEdit.dueDate,
-      });
-    } else {
-      setFormData({
-        title: '',
-        description: '',
-        status: 'in-progress',
-        priority: 'medium',
-        dueDate: '',
-      });
-    }
-  }, [taskToEdit]);
-
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -64,7 +60,7 @@ const SingleStateForm: React.FC<SingleStateFormProps> = ({
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: ChangeEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     // Validation
@@ -82,18 +78,16 @@ const SingleStateForm: React.FC<SingleStateFormProps> = ({
     }
 
     // Reset Form
-    setFormData({
-      title: '',
-      description: '',
-      status: 'in-progress',
-      priority: 'medium',
-      dueDate: '',
-    });
+    setFormData(DEFAULT_FORM_STATE);
     setErrors({});
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 bg-slate-900/60 p-5 rounded-2xl border border-pink-500/10 shadow-lg">
+    <form
+      key={taskToEdit?.id ?? 'new-task'}
+      onSubmit={handleSubmit}
+      className="space-y-4 bg-slate-900/60 p-5 rounded-2xl border border-pink-500/10 shadow-lg"
+    >
       <div className="flex items-center justify-between mb-2">
         <h2 className="text-lg font-semibold text-pink-100">
           {taskToEdit ? '✏️ Edit Task' : '➕ Add New Task'}
